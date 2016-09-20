@@ -1,0 +1,68 @@
+body {
+  color: #fff;
+  background-color: #000;
+  font-family: 'Press Start 2P', cursive;
+  cursor: none;
+}
+#debugger {
+  font-size: xx-small;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+}
+.cmd-input {
+  background: #000;
+  border: none;
+  color: #fff;
+  outline: none;
+  display: block;
+  width: 100%;
+}
+.cmd-input:focus {
+  border: none;
+}
+.cmd-path {
+  float: left;
+  display: block;
+  width: auto;
+}
+.cmd-cursor:after {
+  content: '_';
+  position: absolute;
+  animation: cursorBlink 1.5s linear infinite;
+}
+.cmd {
+  overflow: hidden;
+  clear: both;
+  margin: 15px;
+}
+.cmd .cmd-chars {
+  font-size: 0;
+}
+.cmd .cmd-chars .cmd-char {
+  font-size: 16px;
+}
+@keyframes cursorBlink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.clear {
+  clear: both;
+  float: none;
+}
+.offscreen {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+}
+.underline {
+  text-decoration: underline;
+}

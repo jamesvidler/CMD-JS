@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <title>Command</title>
+        <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+        <link href="app.css" rel="stylesheet" / >
+    </head>
+
+    <body data-bind="click: click.keepCmdFocus">
+        
+        <aside id="debugger" data-bind="if: _if.showDebugger">
+            <p class="underline">Debugging Enabled</p>
+            <div>
+                Terminal Mode:
+                <span data-bind="html: currentInputCommand().inputHasFocus"></span>
+            </div>
+
+            <div>
+                Cursor Pos:
+                <span data-bind="html: currentInputCommand().cursorPosition"></span>
+            </div>
+
+            <div>
+                Old Text:
+                <span data-bind="html: currentInputCommand().tempValue"></span>
+            </div>
+
+            <div>
+                Real Text:
+                <span data-bind="html: currentInputCommand().value"></span>
+            </div>
+
+            <div>
+                HTML Text:
+                <span data-bind="html: currentInputCommand().htmlValue"></span>
+            </div>
+            
+        </aside>
+
+        <main>
+            
+            <div class="cmds" data-bind="foreach:commands">
+                <div class="cmd">
+                    <label class="cmd-path">
+                        <span data-bind="text: path"></span>
+                        <span>></span>
+                    </label>
+                    <span class="cmd-cursor" data-bind="visible: vis.showCursorAtZeroLength"></span>
+                    <span class="cmd-chars" data-bind="foreach: charAryValue">
+                        <span class="cmd-char" data-bind="text: char, cursor: { index: $index, pos: $parent.cursorPosition, isActiveInput: $parent.isActiveInput }"></span>
+                    </span>
+                    
+                    <textarea class="cmd-input" type="text" data-bind="css: { 'offscreen': $parent.liveMode() }, cmdInput: { text: htmlValue, value: value, pos: cursorPosition, onEnter: $parent.processInput }, hasFocus: inputHasFocus"></textarea>
+
+                    <div class="clear"></div>
+                </div>
+                
+                
+            </div>
+            
+
+        </main>
+       
+        <script   src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+        <script type="text/javascript" src="app.js"></script>
+    </body>
+
+</html>
