@@ -93,19 +93,25 @@ ko.bindingHandlers.cursor = {
         var obj = ko.unwrap(valueAccessor());
         var pos = ko.unwrap(obj.pos);
         var charIndex = ko.unwrap(obj.index);
-        var isActiveInput = ko.unwrap(obj.isActiveInput);
+        var isActiveCommand = ko.unwrap(obj.isActiveCommand);
+        var isLoading = ko.unwrap(obj.isLoading);
         
-        
-        if(isActiveInput) {
+        if(isActiveCommand) {
+
+            if(isLoading) {
+                $(element).addClass('cmd-cursor-loading');
+            } 
 
             if(pos == charIndex + 1) {
                 $(element).addClass('cmd-cursor');
             } else {
                 $(element).removeClass('cmd-cursor');
+                $(element).removeClass('cmd-cursor-loading');
             }
 
         } else {
             $(element).removeClass('cmd-cursor');
+            $(element).removeClass('cmd-cursor-loading');
         }
 
     }

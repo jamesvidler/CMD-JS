@@ -1,8 +1,19 @@
 body {
+  font-family: 'Press Start 2P', cursive;
+  overflow: hidden;
+}
+main {
   color: #fff;
   background-color: #000;
-  font-family: 'Press Start 2P', cursive;
-  cursor: none;
+  position: absolute;
+  margin: 0 auto;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  animation: boot 0.5s ease-in forwards;
 }
 #debugger {
   font-size: xx-small;
@@ -31,6 +42,10 @@ body {
   position: absolute;
   animation: cursorBlink 1.5s linear infinite;
 }
+.cmd-cursor.cmd-cursor-loading:after {
+  content: '/';
+  animation: cursorLoading 1s linear infinite;
+}
 .cmd {
   overflow: hidden;
   clear: both;
@@ -42,6 +57,19 @@ body {
 .cmd .cmd-chars .cmd-char {
   font-size: 16px;
 }
+@keyframes boot {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    border-radius: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
 @keyframes cursorBlink {
   0% {
     opacity: 1;
@@ -51,6 +79,17 @@ body {
   }
   100% {
     opacity: 1;
+  }
+}
+@keyframes cursorLoading {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 .clear {

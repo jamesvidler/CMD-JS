@@ -1,5 +1,5 @@
 
-var Command = function(isInput, path, commandVal, writtenCallback, onReadCallback) {
+var Command = function(cmdJS, isInput, path, commandVal, writtenCallback, onReadCallback) {
     var self = this;
 
     if(!commandVal) {
@@ -7,7 +7,7 @@ var Command = function(isInput, path, commandVal, writtenCallback, onReadCallbac
     }
 
     self.isInput = ko.observable(isInput);
-    self.isActiveInput = ko.observable(isInput);
+    self.isActiveCommand = ko.observable(true);
     self.inputHasFocus = ko.observable(true);
     self.value = ko.observable(commandVal);
     self.tempValue = ko.observable(self.value());
@@ -41,6 +41,7 @@ var Command = function(isInput, path, commandVal, writtenCallback, onReadCallbac
                  self.charAryValue(charArray);
 
             } else {
+                
                 //this is output, type it out
                 var loadChar = function(i, str, length) {
                     setTimeout(function() {
@@ -53,7 +54,7 @@ var Command = function(isInput, path, commandVal, writtenCallback, onReadCallbac
                             }                            
                         }
 
-                    }, (i * 10))
+                    }, (i * cmdJS.outputSpeed()))
                 }
 
                 for(var i in cleanValue) {
@@ -69,14 +70,32 @@ var Command = function(isInput, path, commandVal, writtenCallback, onReadCallbac
     });
     self.charAryValue = ko.observableArray([]);
     self.cursorPosition = ko.observable(0);
+    self.isLoading = ko.pureComputed({
+        read: function() {
+            
+            var value = ko.unwrap(self.value);
+            var arr = ko.unwrap(self.charAryValue);
+            var isActive = ko.unwrap(self.isActiveCommand);
+            var isInput = ko.unwrap(self.isInput);
+
+            if(value.indexOf("...") > -1 && isActive && !isInput) {
+                console.log('is loading...');
+                return true;
+            }
+
+            return false;
+        },
+        owner: this
+        
+    })
     self.path = path;
     self.vis = {
         showCursorAtZeroLength: ko.pureComputed({
             read: function() {
                 var cursorPosition = ko.unwrap(self.cursorPosition);
-                var isActiveInput = ko.unwrap(self.isActiveInput);
+                var isActiveCommand = ko.unwrap(self.isActiveCommand);
                 
-                return cursorPosition == 0 && isActiveInput;
+                return cursorPosition == 0 && isActiveCommand;
             },
             owner: this
         })
@@ -92,8 +111,9 @@ var Command = function(isInput, path, commandVal, writtenCallback, onReadCallbac
 var CommandJS = function(config) {
 
     var self = this;
-    self.liveMode = ko.observable(false);
+    self.liveMode = ko.observable(config.liveMode);
     self.commands = ko.observableArray([]);
+    self.outputSpeed = ko.observable(config.outputSpeed);
     self.inputPath = ko.observable("input");
     self.outputPath = ko.observable("output");
     self.programs = [
@@ -113,7 +133,45 @@ var CommandJS = function(config) {
             program.onExecute(self);
         }
     }
+    self.executeGuide = function() {
+        var guide = config.programs[1].guide;
+
+        var addOutput = function (i) {
+            
+            
+            var t = i + 1;
+
+            if(t < guide.length) {
+                //we have a next step
+                self.newOutput(guide[i].value, function() {
+                    setTimeout(function() {
+                        addOutput(i)
+                    }, guide[i - 1].wait)
+                    
+                })
+                
+            } else {
+                self.newOutput(guide[i].value, function() {
+                    self.newInput("");
+                });
+            }
+
+            i++;
+        }
+
+
+            
+
+        if(guide[0].type == 'output') {
+            addOutput(0);
+        } 
+
+            
+            
+        
+    }
     self.newOutput = function(commandStr, writtenCallback) {
+        self.disableCommands(self.commands());
 
         if(!writtenCallback) {
             var writtenCallback = function() {
@@ -121,25 +179,30 @@ var CommandJS = function(config) {
             }
         }
 
-        var command = new Command(false, self.outputPath(), commandStr, writtenCallback);
+        var command = new Command(self, false, self.outputPath(), commandStr, writtenCallback);
         self.commands.push(command);
     }
     self.newInput = function(inputStr, onReadCallback) {
-        var command = new Command(true, self.inputPath(), inputStr, null, onReadCallback);
+        self.disableCommands(self.commands());
+
+        var command = new Command(self, true, self.inputPath(), inputStr, null, onReadCallback);
         self.commands.push(command);
+    }
+    self.disableCommands = function(commands) {
+        //turn off any pending input
+        for (var i in commands) {
+            if(commands[i].isActiveCommand() == true) {
+                self.commands()[i].isActiveCommand(false);
+            }
+        }
     }
     self.processInput = function() {
         var commands = self.commands();
 
         var currentCommand = self.getActiveCmdInput(commands);
         
-
-        //turn off any pending input
-        for (var i in commands) {
-            if(commands[i].isActiveInput() == true) {
-                self.commands()[i].isActiveInput(false);
-            }
-        }
+        //disable cursor on other fields
+        self.disableCommands(commands);
         
         if(currentCommand.onReadCallback && $.isFunction(currentCommand.onReadCallback)) {
             //instead of treating value like a command, kick back the input string
@@ -177,7 +240,7 @@ var CommandJS = function(config) {
     }
     self.getActiveCmdInput = function(commands) {
         for(var i in commands) {
-            if(commands[i].isActiveInput() == true) {
+            if(commands[i].isActiveCommand() == true && commands[i].isInput()) {
                 return commands[i];
             }
         }
@@ -205,22 +268,20 @@ var CommandJS = function(config) {
         keepCmdFocus: function() {
             var commands = self.commands();
             for(var i in commands) {
-                if(commands[i].isActiveInput() == true) {
+                if(commands[i].isActiveCommand() == true) {
                     self.commands()[i].inputHasFocus(true);
                     return;
                 }
             }
         }
     }
-    self.welcome = function() {
-        self.outputPath('website')
-        self.inputPath('you');
-        self.newInput("");
-    }
     self.init = function() {
 
         self.programs = $.merge(self.programs, config.programs);
-        self.welcome();
+
+        if(config.onStart && $.isFunction(config.onStart)) {
+            config.onStart(self);
+        }
 
     }
 
