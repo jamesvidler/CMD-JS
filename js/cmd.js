@@ -33,6 +33,7 @@ var Command = function(cmdJS, isInput, path, commandVal, writtenCallback, onRead
 
             //this input, write out the array asap
             if(self.isInput()) {
+
                 //write out the new chars
                 for(var i in cleanValue) {
                     charArray.push({ char: cleanValue[i] });
@@ -42,6 +43,8 @@ var Command = function(cmdJS, isInput, path, commandVal, writtenCallback, onRead
 
             } else {
                 
+                responsiveVoice.speak(cleanValue);
+
                 //this is output, type it out
                 var loadChar = function(i, str, length) {
                     setTimeout(function() {
@@ -119,18 +122,18 @@ var CommandJS = function(config) {
     self.programs = [
         {
             name: "ProgramNotFound",
-            onExecute: function(thisCommand) {
-                self.newOutput("Your command did not match a program. Try again.", function() {
+            onExecute: function(thisCommand, args) {
+                self.newOutput("'" + args + "' Your command did not match a program. Try again.", function() {
                     self.newInput("");
                 });
             }
         }
     ]
-    self.executeProgramByName = function(programName) {
+    self.executeProgramByName = function(programName, args) {
         var program = self.lookupProgram(programName);
 
         if(program && program.onExecute && $.isFunction(program.onExecute)) {
-            program.onExecute(self);
+            program.onExecute(self, args);
         }
     }
     self.executeGuide = function() {
@@ -165,9 +168,7 @@ var CommandJS = function(config) {
         if(guide[0].type == 'output') {
             addOutput(0);
         } 
-
-            
-            
+                 
         
     }
     self.newOutput = function(commandStr, writtenCallback) {
@@ -215,13 +216,14 @@ var CommandJS = function(config) {
                 self.executeProgram(program, currentCommand);
             } else {
                 //program not found
-                self.executeProgramByName("ProgramNotFound");
+                self.executeProgramByName("ProgramNotFound", currentCommand.value());
             }
         }
 
         
 
     }
+
 
     self.lookupProgram = function(inputStr) {
         

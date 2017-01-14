@@ -12,7 +12,8 @@ var cmdConfig = {
         //     }, 2000)
         // });
         // }, 1000)
-        cmdJS.executeProgramByName("Initialize");
+        //cmdJS.executeProgramByName("Initialize");
+        cmdJS.executeProgramByName("Bot");
         
     },
     programs: [
@@ -172,6 +173,41 @@ var cmdConfig = {
                 // });
 
                 cmdJS.executeGuide();
+            }
+        },
+        {
+            name: "Bot",
+            onExecute: function(cmdJS, thisCommand) {
+                
+                $.ajax({
+                    type: "POST",
+                    url: 'http://localhost:3979/api/restmessages/post',
+                    data: {
+                        "type": "message",
+                        "text": "hello",
+                        "from": {
+                            "id": "default-user",
+                            "name": "User"
+                        },
+                        "timestamp": "2017-01-14T23:29:46.049Z",
+                        "channelData": {
+                            "clientActivityId": "1484436569505.8640883124168792.0"
+                        },
+                        "id": "a48im7ck08l2ejnjc",
+                        "channelId": "emulator",
+                        "recipient": {
+                            "id": "a7njh703e95hm02jc"
+                        },
+                        "conversation": {
+                            "id": "hfm69ng0a4ld8ek4l"
+                        },
+                        "serviceUrl": "http://localhost:51418"
+                    },
+                    success: function(response) {
+                        debugger
+                    },
+                })
+
             }
         }
     ]
