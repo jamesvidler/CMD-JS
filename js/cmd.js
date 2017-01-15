@@ -11,8 +11,40 @@ var Command = function(cmdJS, isInput, path, commandVal, writtenCallback, onRead
     self.inputHasFocus = ko.observable(true);
     self.value = ko.observable(commandVal);
     self.tempValue = ko.observable(self.value());
-    self.htmlValue = ko.pureComputed({
+    
+    self.charAryValue = ko.observableArray([]);
+    self.cursorPosition = ko.observable(0);
+    self.isLoading = ko.pureComputed({
         read: function() {
+            
+            var value = ko.unwrap(self.value);
+            var arr = ko.unwrap(self.charAryValue);
+            var isActive = ko.unwrap(self.isActiveCommand);
+            var isInput = ko.unwrap(self.isInput);
+
+            if(value.indexOf("...") > -1 && isActive && !isInput) {
+                console.log('is loading...');
+                return true;
+            }
+
+            return false;
+        },
+        owner: this
+        
+    })
+    self.path = path;
+    self.vis = {
+        showCursorAtZeroLength: ko.pureComputed({
+            read: function() {
+                var cursorPosition = ko.unwrap(self.cursorPosition);
+                var isActiveCommand = ko.unwrap(self.isActiveCommand);
+                
+                return cursorPosition == 0 && isActiveCommand;
+            },
+            owner: this
+        })
+    }
+    self.htmlValue = ko.computed(function() {
             
             var value = ko.unwrap(self.value);
             var cleanValue = value.replace(/ /g, '\u00a0');
@@ -68,41 +100,7 @@ var Command = function(cmdJS, isInput, path, commandVal, writtenCallback, onRead
             self.tempValue(value);
 
             return cleanValue;
-        },
-        owner: this
     });
-    self.charAryValue = ko.observableArray([]);
-    self.cursorPosition = ko.observable(0);
-    self.isLoading = ko.pureComputed({
-        read: function() {
-            
-            var value = ko.unwrap(self.value);
-            var arr = ko.unwrap(self.charAryValue);
-            var isActive = ko.unwrap(self.isActiveCommand);
-            var isInput = ko.unwrap(self.isInput);
-
-            if(value.indexOf("...") > -1 && isActive && !isInput) {
-                console.log('is loading...');
-                return true;
-            }
-
-            return false;
-        },
-        owner: this
-        
-    })
-    self.path = path;
-    self.vis = {
-        showCursorAtZeroLength: ko.pureComputed({
-            read: function() {
-                var cursorPosition = ko.unwrap(self.cursorPosition);
-                var isActiveCommand = ko.unwrap(self.isActiveCommand);
-                
-                return cursorPosition == 0 && isActiveCommand;
-            },
-            owner: this
-        })
-    }
     self.onReadCallback = onReadCallback;
 }
 
@@ -261,7 +259,7 @@ var CommandJS = function(config) {
                 var isLiveMode = ko.unwrap(self.liveMode);
                 var hasCurrentInput = ko.unwrap(self.currentInputCommand);
 
-                return !isLiveMode && hasCurrentInput != null;
+                return (!isLiveMode && hasCurrentInput != null);
             },
             owner: this
         })

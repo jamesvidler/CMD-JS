@@ -1,7 +1,7 @@
 
 var cmdConfig = {
     name: "Sample CMD",
-    liveMode: false,
+    liveMode: true,
     outputSpeed : 30,
     onStart: function(cmdJS) {
 
@@ -179,34 +179,72 @@ var cmdConfig = {
             name: "Bot",
             onExecute: function(cmdJS, thisCommand) {
                 
-                $.ajax({
-                    type: "POST",
-                    url: 'http://localhost:3979/api/restmessages/post',
-                    data: {
-                        "type": "message",
-                        "text": "hello",
-                        "from": {
-                            "id": "default-user",
-                            "name": "User"
-                        },
-                        "timestamp": "2017-01-14T23:29:46.049Z",
-                        "channelData": {
-                            "clientActivityId": "1484436569505.8640883124168792.0"
-                        },
-                        "id": "a48im7ck08l2ejnjc",
-                        "channelId": "emulator",
-                        "recipient": {
-                            "id": "a7njh703e95hm02jc"
-                        },
-                        "conversation": {
-                            "id": "hfm69ng0a4ld8ek4l"
-                        },
-                        "serviceUrl": "http://localhost:51418"
-                    },
-                    success: function(response) {
-                        debugger
-                    },
-                })
+                cmdJS.inputPath("urban dic");
+
+                cmdJS.newOutput("Search for something... I'll tell you about it.", function() {
+
+                    
+
+                    var search = function(readStr) {
+                        var req = $.ajax({
+                            type: "POST",
+                            url: 'http://localhost:3979/api/restmessages/post',
+                            data: {
+                                "type": "message",
+                                "text": readStr,
+                                "from": {
+                                    "id": "default-user",
+                                    "name": "User"
+                                },
+                                "timestamp": "2017-01-14T23:29:46.049Z",
+                                "channelData": {
+                                    "clientActivityId": "1484436569505.8640883124168792.0"
+                                },
+                                "id": "a48im7ck08l2ejnjc",
+                                "channelId": "emulator",
+                                "recipient": {
+                                    "id": "a7njh703e95hm02jc"
+                                },
+                                "conversation": {
+                                    "id": "hfm69ng0a4ld8ek4l"
+                                },
+                                "serviceUrl": "http://localhost:51418"
+                            }
+                        });
+
+                        req.done(function(response) {
+                                                        
+                            cmdJS.newOutput(response.text, function() {
+
+                                cmdJS.newInput("", function(readStr) {
+                                    search(readStr);
+                                });
+
+                            });
+                        });
+
+                        req.fail(function(err) {
+                            
+                            cmdJS.newOutput("error", function() {
+
+                                cmdJS.newInput("", function(readStr) {
+                                    search(readStr);
+                                });
+
+                            });
+
+                        });
+
+                        req.always(function() {
+                            
+                        });
+                    }
+
+                    cmdJS.newInput("", function(readStr) {
+                        search(readStr);
+                    });
+                });
+
 
             }
         }
