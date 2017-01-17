@@ -75,7 +75,12 @@ var Command = function(cmdJS, isInput, path, commandVal, writtenCallback, onRead
 
             } else {
                 
-                responsiveVoice.speak(cleanValue);
+                try {
+                    var msg = new SpeechSynthesisUtterance(cleanValue);
+                    window.speechSynthesis.speak(msg);
+                } catch (e) {
+                    console.log(e);
+                }
 
                 //this is output, type it out
                 var loadChar = function(i, str, length) {
@@ -275,7 +280,12 @@ var CommandJS = function(config) {
             }
         }
     }
+
     self.init = function() {
+
+        if(!window.console) {
+            console = { log: function(){} };
+        }
 
         self.programs = $.merge(self.programs, config.programs);
 

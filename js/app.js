@@ -179,6 +179,14 @@ var cmdConfig = {
             name: "Bot",
             onExecute: function(cmdJS, thisCommand) {
                 
+                // if(responsiveVoice.voiceSupport()) {
+                    	
+                //     var voicelist = responsiveVoice.getVoices();
+                //     if(voicelist.length > 0) {
+                //         responsiveVoice.setDefaultVoice(voicelist[0].name);
+                //     }
+                // }
+
                 cmdJS.inputPath("urban dic");
 
                 cmdJS.newOutput("Search for something... I'll tell you about it.", function() {
