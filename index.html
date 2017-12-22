@@ -1,13 +1,8 @@
-<!DOCTYPE HTML>
-
 <html>
     <head>
         <title>Command</title>
-        <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-
         <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
         <link href="css/app.css" rel="stylesheet" / >
-        
     </head>
 
     <body data-bind="click: click.keepCmdFocus"> 
@@ -51,10 +46,26 @@
                     </label>
                     <span class="cmd-cursor" data-bind="visible: vis.showCursorAtZeroLength"></span>
                     <span class="cmd-chars" data-bind="foreach: charAryValue">
+                        <!-- ko if: type == 'char' -->
                         <span class="cmd-char" data-bind="text: char, cursor: { index: $index, pos: $parent.cursorPosition, isActiveCommand: $parent.isActiveCommand, isLoading: $parent.isLoading }"></span>
+                        <!-- /ko -->
+                        <!-- ko if: type == 'break' -->
+                        <div></div>
+                        <!-- /ko -->
                     </span>
                     
-                    <textarea class="cmd-input" type="text" data-bind="css: { 'offscreen': true }, cmdInput: { text: htmlValue, value: value, pos: cursorPosition, onEnter: $parent.processInput }, hasFocus: inputHasFocus"></textarea>
+                    
+                    <textarea class="cmd-input" type="text" data-bind="css: { 'offscreen': true },
+                                                                        cmdInput: { 
+                                                                            text: htmlValue,
+                                                                            value: value,
+                                                                            pos: cursorPosition,
+                                                                            onEnter: $parent.processInput,
+                                                                            isInput: isInput,
+                                                                            isActiveCommand: isActiveCommand
+                                                                        },
+                                                                        hasFocus: inputHasFocus">
+                                                                    </textarea>
 
                     <div class="clear"></div>
                 </div>

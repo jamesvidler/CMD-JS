@@ -80,6 +80,13 @@ ko.bindingHandlers.cmdInput = {
         var text = obj.text;
         var pos = obj.pos;
         var elemValue = $(element).val();
+        var isInput = ko.unwrap(obj.isInput);
+        var isActiveCommand = ko.unwrap(obj.isActiveCommand);
+
+        
+        if(!isInput || !isActiveCommand) {
+            $(element).attr('disabled', 'disabled');
+        }
         
         if(value() != elemValue) {
             $(element).val(value()); 

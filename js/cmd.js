@@ -63,30 +63,34 @@ var Command = function(cmdJS, isInput, path, commandVal, writtenCallback, onRead
             
             var charArray = [];
 
-            //this input, write out the array asap
+            //this is input, write out the array asap
             if(self.isInput()) {
 
                 //write out the new chars
                 for(var i in cleanValue) {
-                    charArray.push({ char: cleanValue[i] });
+                    charArray.push({ char: cleanValue[i], type: 'char' });
                 }
 
                  self.charAryValue(charArray);
 
             } else {
                 
-                try {
-                    var msg = new SpeechSynthesisUtterance(cleanValue);
-                    window.speechSynthesis.speak(msg);
-                } catch (e) {
-                    console.log(e);
-                }
-
+                responsiveVoice.speak(cleanValue);
+                
                 //this is output, type it out
+
+
                 var loadChar = function(i, str, length) {
                     setTimeout(function() {
+                        var type = 'char';
                         str = str.replace(/ /g, '\u00a0');
-                        self.charAryValue.push({char: str});
+
+                        if(str.indexOf('|') > -1) {
+                            type = 'break'; 
+                        }
+                        
+                        
+                        self.charAryValue.push({char: str, type: type});
 
                         if(self.charAryValue().length == length) {
                             if(writtenCallback && $.isFunction(writtenCallback)) {
@@ -125,10 +129,24 @@ var CommandJS = function(config) {
     self.programs = [
         {
             name: "ProgramNotFound",
+            hide: true,
             onExecute: function(thisCommand, args) {
                 self.newOutput("'" + args + "' Your command did not match a program. Try again.", function() {
                     self.newInput("");
                 });
+            }
+        },
+        {
+            name: "Help",
+            onExecute: function(thisCommand, args) {
+                var programs = self.programs;
+                var output = "Available commands are listed below:";
+                for(var i in programs) {
+                    if(!programs[i].hide) {
+                        output += "|" + programs[i].name;
+                    }
+                }
+                self.newOutput(output);
             }
         }
     ]
@@ -232,7 +250,7 @@ var CommandJS = function(config) {
         
         for(var i in self.programs) {
             var p = self.programs[i];
-            if(p.name == inputStr) {
+            if(p.name.toLowerCase() == inputStr.toLowerCase()) {
                 return p;
             }
         }
@@ -280,12 +298,7 @@ var CommandJS = function(config) {
             }
         }
     }
-
     self.init = function() {
-
-        if(!window.console) {
-            console = { log: function(){} };
-        }
 
         self.programs = $.merge(self.programs, config.programs);
 
